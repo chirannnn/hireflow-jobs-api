@@ -6,10 +6,12 @@ const app = express();
 const connectToDB = require("./database/db");
 
 const authRoutes = require("./routes/auth.routes");
+const homeRoutes = require("./routes/home.routes");
 
 app.use(express.json());
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/home", homeRoutes);
 
 const PORT = process.env.PORT || 3000;
 
