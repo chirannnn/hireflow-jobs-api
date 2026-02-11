@@ -7,11 +7,15 @@ const connectToDB = require("./database/db");
 
 const authRoutes = require("./routes/auth.routes");
 const homeRoutes = require("./routes/home.routes");
+const employerRoutes = require("./routes/employer.routes");
+const adminRoutes = require("./routes/admin.routes");
 
 app.use(express.json());
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/home", homeRoutes);
+app.use("/api/v1/employer", employerRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 const PORT = process.env.PORT || 3000;
 
