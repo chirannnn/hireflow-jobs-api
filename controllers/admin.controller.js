@@ -54,4 +54,21 @@ const updateUserRole = async (req, res) => {
   }
 };
 
-module.exports = { updateUserRole };
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("_id username email role");
+
+    return res.status(200).json({
+      success: true,
+      users,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+module.exports = { updateUserRole, getAllUsers };

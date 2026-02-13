@@ -2,7 +2,10 @@ const express = require("express");
 
 const authMiddleware = require("../middlewares/auth.middleware");
 const adminMiddleware = require("../middlewares/admin.middleware");
-const { updateUserRole } = require("../controllers/admin.controller");
+const {
+  updateUserRole,
+  getAllUsers,
+} = require("../controllers/admin.controller");
 
 const router = express.Router();
 
@@ -20,5 +23,7 @@ router.patch(
   adminMiddleware,
   updateUserRole,
 );
+
+router.get("/users", authMiddleware, adminMiddleware, getAllUsers);
 
 module.exports = router;
