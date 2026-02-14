@@ -10,6 +10,7 @@ const homeRoutes = require("./routes/home.routes");
 const employerRoutes = require("./routes/employer.routes");
 const adminRoutes = require("./routes/admin.routes");
 const jobRoutes = require("./routes/job.routes");
+const applicationRoutes = require("./routes/application.routes");
 
 app.use(express.json());
 
@@ -18,6 +19,7 @@ app.use("/api/v1/home", homeRoutes);
 app.use("/api/v1/employer", employerRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/jobs", jobRoutes);
+app.use("/api/v1/application", applicationRoutes);
 
 const PORT = process.env.PORT || 3000;
 
