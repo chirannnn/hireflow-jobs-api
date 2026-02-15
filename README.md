@@ -62,7 +62,7 @@ hireflow/
 │   ├── admin.middleware.js
 │   └── employer.middleware.js
 │
-├── config/
+├── databse/
 │   └── db.js
 │
 ├── server.js
@@ -78,7 +78,7 @@ hireflow/
 ### 1️⃣ Clone Repository
 
 ```bash
-git clone https://github.com/your-username/hireflow.git
+git clone https://github.com/chirannnn/hireflow-jobs-api.git
 cd hireflow
 ```
 
