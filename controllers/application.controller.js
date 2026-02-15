@@ -141,4 +141,40 @@ const updateApplicationStatus = async (req, res) => {
   }
 };
 
-module.exports = { applyJob, getJobApplications, updateApplicationStatus };
+const getMyApplications = async (req, res) => {
+  try {
+    const userId = req.userInfo.userId;
+
+    if (req.userInfo.role !== "user") {
+      return res.status(403).json({
+        success: false,
+        message: "Only users can view their applications",
+      });
+    }
+
+    const applications = await Application.find({
+      applicant: userId,
+    })
+      .populate("job", "title company location salary")
+      .select("_id job status createdAt");
+
+    return res.status(200).json({
+      success: true,
+      count: applications.length,
+      applications,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+module.exports = {
+  applyJob,
+  getJobApplications,
+  updateApplicationStatus,
+  getMyApplications,
+};

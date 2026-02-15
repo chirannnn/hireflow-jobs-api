@@ -3,6 +3,7 @@ const {
   applyJob,
   getJobApplications,
   updateApplicationStatus,
+  getMyApplications,
 } = require("../controllers/application.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 const employerMiddleware = require("../middlewares/employer.middleware");
@@ -24,5 +25,7 @@ router.patch(
   employerMiddleware,
   updateApplicationStatus,
 );
+
+router.get("/my", authMiddleware, getMyApplications);
 
 module.exports = router;
