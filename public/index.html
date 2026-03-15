@@ -1,0 +1,1913 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HireFlow — Job Portal</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0b0d12;
+        --bg2: #12151e;
+        --bg3: #1a1f2e;
+        --border: #242938;
+        --accent: #f0a500;
+        --accent2: #ff6b35;
+        --text: #e8eaf0;
+        --muted: #7a8099;
+        --success: #22c55e;
+        --danger: #ef4444;
+        --pending: #f59e0b;
+        --radius: 12px;
+        --font-head: "Syne", sans-serif;
+        --font-body: "DM Sans", sans-serif;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 15px;
+        min-height: 100vh;
+      }
+
+      /* ── SCROLLBAR ── */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg2);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+      }
+
+      /* ── NAV ── */
+      nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(11, 13, 18, 0.92);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--border);
+        padding: 0 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 60px;
+      }
+      .nav-logo {
+        font-family: var(--font-head);
+        font-weight: 800;
+        font-size: 20px;
+        color: var(--text);
+        cursor: pointer;
+      }
+      .nav-logo span {
+        color: var(--accent);
+      }
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .nav-badge {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-size: 12px;
+        color: var(--muted);
+        font-family: var(--font-head);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .nav-badge.admin {
+        color: #a78bfa;
+        border-color: #a78bfa44;
+        background: #a78bfa11;
+      }
+      .nav-badge.employer {
+        color: var(--accent);
+        border-color: #f0a50044;
+        background: #f0a50011;
+      }
+      .nav-badge.user {
+        color: var(--success);
+        border-color: #22c55e44;
+        background: #22c55e11;
+      }
+
+      /* ── BUTTONS ── */
+      .btn {
+        font-family: var(--font-body);
+        font-size: 14px;
+        font-weight: 500;
+        padding: 9px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #000;
+      }
+      .btn-primary:hover {
+        background: #ffd060;
+        transform: translateY(-1px);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--border);
+      }
+      .btn-ghost:hover {
+        color: var(--text);
+        border-color: var(--muted);
+      }
+      .btn-danger {
+        background: #ef444422;
+        color: var(--danger);
+        border: 1px solid #ef444433;
+      }
+      .btn-danger:hover {
+        background: #ef444433;
+      }
+      .btn-success {
+        background: #22c55e22;
+        color: var(--success);
+        border: 1px solid #22c55e33;
+      }
+      .btn-success:hover {
+        background: #22c55e33;
+      }
+      .btn-sm {
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 6px;
+      }
+      .btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        transform: none !important;
+      }
+
+      /* ── TOAST ── */
+      #toast-container {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .toast {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 13px 18px;
+        font-size: 14px;
+        max-width: 320px;
+        animation: slideUp 0.25s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .toast.success {
+        border-left: 3px solid var(--success);
+      }
+      .toast.error {
+        border-left: 3px solid var(--danger);
+      }
+      .toast.info {
+        border-left: 3px solid var(--accent);
+      }
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ── VIEWS ── */
+      .view {
+        display: none;
+        animation: fadeIn 0.25s ease;
+      }
+      .view.active {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* ── PAGE WRAPPER ── */
+      .page {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 40px 24px;
+      }
+
+      /* ── HERO (JOBS PAGE) ── */
+      .hero {
+        text-align: center;
+        padding: 64px 24px 40px;
+        position: relative;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          ellipse 60% 40% at 50% 0%,
+          #f0a50018 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .hero h1 {
+        font-family: var(--font-head);
+        font-size: clamp(32px, 5vw, 54px);
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 14px;
+      }
+      .hero h1 em {
+        font-style: normal;
+        color: var(--accent);
+      }
+      .hero p {
+        color: var(--muted);
+        font-size: 16px;
+        max-width: 460px;
+        margin: 0 auto;
+      }
+
+      /* ── CARDS ── */
+      .card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+      }
+      .card:hover {
+        border-color: #2e3448;
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+        margin-top: 24px;
+      }
+
+      /* ── JOB CARD ── */
+      .job-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 22px;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .job-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        opacity: 0;
+        transition: opacity 0.18s;
+      }
+      .job-card:hover {
+        border-color: #f0a50033;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px #0008;
+      }
+      .job-card:hover::before {
+        opacity: 1;
+      }
+      .job-title {
+        font-family: var(--font-head);
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 6px;
+      }
+      .job-company {
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 12px;
+      }
+      .job-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .tag {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .tag.salary {
+        color: var(--success);
+        border-color: #22c55e33;
+        background: #22c55e0a;
+      }
+
+      /* ── AUTH FORM ── */
+      .auth-wrap {
+        min-height: calc(100vh - 60px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 24px;
+      }
+      .auth-box {
+        width: 100%;
+        max-width: 420px;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 40px 36px;
+      }
+      .auth-box h2 {
+        font-family: var(--font-head);
+        font-size: 26px;
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+      .auth-box p {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 28px;
+      }
+
+      /* ── FORM ── */
+      .form-group {
+        margin-bottom: 18px;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        margin-bottom: 7px;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 11px 14px;
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px #f0a50015;
+      }
+      select option {
+        background: var(--bg3);
+      }
+      textarea {
+        resize: vertical;
+        min-height: 90px;
+      }
+
+      /* ── DIVIDER ── */
+      .divider {
+        text-align: center;
+        margin: 20px 0;
+        position: relative;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .divider::before,
+      .divider::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 42%;
+        height: 1px;
+        background: var(--border);
+      }
+      .divider::before {
+        left: 0;
+      }
+      .divider::after {
+        right: 0;
+      }
+
+      /* ── DASHBOARD ── */
+      .dash-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+      }
+      .dash-header h2 {
+        font-family: var(--font-head);
+        font-weight: 800;
+        font-size: 24px;
+      }
+      .dash-header span {
+        color: var(--accent);
+      }
+
+      /* ── TABS ── */
+      .tabs {
+        display: flex;
+        gap: 4px;
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 4px;
+        margin-bottom: 28px;
+        width: fit-content;
+      }
+      .tab {
+        padding: 8px 18px;
+        border-radius: 7px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        color: var(--muted);
+        border: none;
+        background: transparent;
+        font-family: var(--font-body);
+        transition: all 0.15s;
+      }
+      .tab.active {
+        background: var(--bg);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+        animation: fadeIn 0.2s ease;
+      }
+
+      /* ── TABLE ── */
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      th {
+        text-align: left;
+        padding: 10px 16px;
+        color: var(--muted);
+        font-weight: 500;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid var(--border);
+      }
+      td {
+        padding: 13px 16px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      tr:hover td {
+        background: #ffffff05;
+      }
+
+      /* ── STATUS BADGE ── */
+      .status {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .status.pending {
+        background: #f59e0b18;
+        color: var(--pending);
+        border: 1px solid #f59e0b33;
+      }
+      .status.accepted {
+        background: #22c55e18;
+        color: var(--success);
+        border: 1px solid #22c55e33;
+      }
+      .status.rejected {
+        background: #ef444418;
+        color: var(--danger);
+        border: 1px solid #ef444433;
+      }
+
+      /* ── MODAL ── */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        animation: fadeIn 0.2s ease;
+      }
+      .modal {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        width: 100%;
+        max-width: 520px;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+      }
+      .modal h3 {
+        font-family: var(--font-head);
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 20px;
+      }
+      .modal-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        transition: all 0.15s;
+      }
+      .modal-close:hover {
+        color: var(--text);
+      }
+
+      /* ── EMPTY STATE ── */
+      .empty {
+        text-align: center;
+        padding: 60px 24px;
+        color: var(--muted);
+      }
+      .empty-icon {
+        font-size: 40px;
+        margin-bottom: 12px;
+      }
+      .empty h3 {
+        font-family: var(--font-head);
+        font-size: 18px;
+        color: var(--text);
+        margin-bottom: 6px;
+      }
+
+      /* ── PAGINATION ── */
+      .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 32px;
+      }
+      .page-btn {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg2);
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.15s;
+      }
+      .page-btn.active {
+        background: var(--accent);
+        color: #000;
+        border-color: var(--accent);
+        font-weight: 700;
+      }
+      .page-btn:hover:not(.active) {
+        border-color: var(--muted);
+        color: var(--text);
+      }
+      .page-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+
+      /* ── SECTION HEADING ── */
+      .section-title {
+        font-family: var(--font-head);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin-bottom: 16px;
+      }
+
+      /* ── STAT CARDS ── */
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 14px;
+        margin-bottom: 28px;
+      }
+      .stat {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+      }
+      .stat-val {
+        font-family: var(--font-head);
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--accent);
+      }
+      .stat-label {
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 4px;
+      }
+
+      /* ── SPINNER ── */
+      .spinner {
+        width: 22px;
+        height: 22px;
+        border: 2px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        margin: 40px auto;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ── LINK ── */
+      .link {
+        color: var(--accent);
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none;
+        transition: opacity 0.15s;
+      }
+      .link:hover {
+        opacity: 0.75;
+      }
+
+      /* ── JOB DETAIL ── */
+      .job-detail-header {
+        background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 28px 28px 24px;
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+      .job-detail-header::after {
+        content: "";
+        position: absolute;
+        right: -40px;
+        top: -40px;
+        width: 160px;
+        height: 160px;
+        background: radial-gradient(circle, #f0a50015 0%, transparent 70%);
+      }
+      .job-detail-title {
+        font-family: var(--font-head);
+        font-size: 26px;
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+
+      /* ── ROLE COLORS ── */
+      .role-user {
+        color: var(--success);
+      }
+      .role-employer {
+        color: var(--accent);
+      }
+      .role-admin {
+        color: #a78bfa;
+      }
+
+      @media (max-width: 600px) {
+        .auth-box {
+          padding: 28px 20px;
+        }
+        .modal {
+          padding: 24px 18px;
+        }
+        .page {
+          padding: 24px 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAV -->
+    <nav>
+      <div class="nav-logo" onclick="goHome()">Hire<span>Flow</span></div>
+      <div class="nav-right">
+        <span
+          id="nav-role-badge"
+          class="nav-badge"
+          style="display: none"
+        ></span>
+        <button
+          class="btn btn-ghost btn-sm"
+          id="nav-btn-login"
+          onclick="showView('login')"
+        >
+          Login
+        </button>
+        <button
+          class="btn btn-primary btn-sm"
+          id="nav-btn-register"
+          onclick="showView('register')"
+        >
+          Sign Up
+        </button>
+        <button
+          class="btn btn-ghost btn-sm"
+          id="nav-btn-dashboard"
+          style="display: none"
+          onclick="goDashboard()"
+        >
+          Dashboard
+        </button>
+        <button
+          class="btn btn-ghost btn-sm"
+          id="nav-btn-logout"
+          style="display: none"
+          onclick="logout()"
+        >
+          Logout
+        </button>
+      </div>
+    </nav>
+
+    <!-- TOAST -->
+    <div id="toast-container"></div>
+
+    <!-- ═══════════════════════════════════════════
+     VIEW: JOBS (HOME)
+═══════════════════════════════════════════ -->
+    <div id="view-jobs" class="view">
+      <div class="hero">
+        <h1>Find Your <em>Dream</em><br />Job Today</h1>
+        <p>
+          Thousands of opportunities, zero noise. Browse live postings from top
+          employers.
+        </p>
+      </div>
+      <div class="page" style="padding-top: 0">
+        <div id="jobs-loading" class="spinner"></div>
+        <div id="jobs-list" class="card-grid" style="display: none"></div>
+        <div id="jobs-empty" class="empty" style="display: none">
+          <div class="empty-icon">📭</div>
+          <h3>No jobs posted yet</h3>
+          <p>Check back soon — employers are signing up!</p>
+        </div>
+        <div
+          id="jobs-pagination"
+          class="pagination"
+          style="display: none"
+        ></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+     VIEW: JOB DETAIL
+═══════════════════════════════════════════ -->
+    <div id="view-job-detail" class="view">
+      <div class="page">
+        <button
+          class="btn btn-ghost btn-sm"
+          style="margin-bottom: 20px"
+          onclick="showView('jobs')"
+        >
+          ← Back to Jobs
+        </button>
+        <div id="job-detail-content"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+     VIEW: LOGIN
+═══════════════════════════════════════════ -->
+    <div id="view-login" class="view">
+      <div class="auth-wrap">
+        <div class="auth-box">
+          <h2>Welcome back</h2>
+          <p>Sign in to your HireFlow account</p>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input
+              type="email"
+              id="login-email"
+              placeholder="you@example.com"
+            />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              id="login-password"
+              placeholder="••••••••"
+              onkeydown="if (event.key === 'Enter') doLogin();"
+            />
+          </div>
+          <button
+            class="btn btn-primary"
+            style="width: 100%"
+            id="login-btn"
+            onclick="doLogin()"
+          >
+            Sign In
+          </button>
+          <div class="divider">or</div>
+          <p style="text-align: center; color: var(--muted); font-size: 14px">
+            Don't have an account?
+            <span class="link" onclick="showView('register')"
+              >Sign up free</span
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+     VIEW: REGISTER
+═══════════════════════════════════════════ -->
+    <div id="view-register" class="view">
+      <div class="auth-wrap">
+        <div class="auth-box">
+          <h2>Create Account</h2>
+          <p>Join HireFlow and start your journey</p>
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="reg-username" placeholder="johndoe" />
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="reg-email" placeholder="you@example.com" />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              id="reg-password"
+              placeholder="••••••••"
+              onkeydown="if (event.key === 'Enter') doRegister();"
+            />
+          </div>
+          <button
+            class="btn btn-primary"
+            style="width: 100%"
+            id="reg-btn"
+            onclick="doRegister()"
+          >
+            Create Account
+          </button>
+          <div class="divider">or</div>
+          <p style="text-align: center; color: var(--muted); font-size: 14px">
+            Already have an account?
+            <span class="link" onclick="showView('login')">Sign in</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+     VIEW: USER DASHBOARD
+═══════════════════════════════════════════ -->
+    <div id="view-user" class="view">
+      <div class="page">
+        <div class="dash-header">
+          <h2>Hello, <span id="user-name">there</span> 👋</h2>
+        </div>
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('user', 'browse')">
+            Browse Jobs
+          </button>
+          <button class="tab" onclick="switchTab('user', 'my-apps')">
+            My Applications
+          </button>
+        </div>
+
+        <!-- Browse Jobs Tab -->
+        <div id="user-tab-browse" class="tab-content active">
+          <div id="user-jobs-loading" class="spinner"></div>
+          <div
+            id="user-jobs-list"
+            class="card-grid"
+            style="display: none"
+          ></div>
+          <div id="user-jobs-empty" class="empty" style="display: none">
+            <div class="empty-icon">📭</div>
+            <h3>No jobs available</h3>
+            <p>Check back soon!</p>
+          </div>
+          <div
+            id="user-jobs-pagination"
+            class="pagination"
+            style="display: none"
+          ></div>
+        </div>
+
+        <!-- My Applications Tab -->
+        <div id="user-tab-my-apps" class="tab-content">
+          <div id="my-apps-loading" class="spinner"></div>
+          <div id="my-apps-content" style="display: none"></div>
+          <div id="my-apps-empty" class="empty" style="display: none">
+            <div class="empty-icon">📝</div>
+            <h3>No applications yet</h3>
+            <p>Browse jobs and hit Apply to get started.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+     VIEW: EMPLOYER DASHBOARD
+═══════════════════════════════════════════ -->
+    <div id="view-employer" class="view">
+      <div class="page">
+        <div class="dash-header">
+          <h2>Employer <span>Dashboard</span></h2>
+          <button
+            class="btn btn-primary btn-sm"
+            onclick="openModal('create-job-modal')"
+          >
+            + Post a Job
+          </button>
+        </div>
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('employer', 'my-jobs')">
+            My Jobs
+          </button>
+          <button class="tab" onclick="switchTab('employer', 'applicants')">
+            Applicants
+          </button>
+        </div>
+
+        <!-- My Jobs -->
+        <div id="employer-tab-my-jobs" class="tab-content active">
+          <div id="emp-jobs-loading" class="spinner"></div>
+          <div id="emp-jobs-list" class="card-grid" style="display: none"></div>
+          <div id="emp-jobs-empty" class="empty" style="display: none">
+            <div class="empty-icon">💼</div>
+            <h3>No jobs posted yet</h3>
+            <p>Hit "Post a Job" to create your first listing.</p>
+          </div>
+        </div>
+
+        <!-- Applicants -->
+        <div id="employer-tab-applicants" class="tab-content">
+          <div class="form-group" style="max-width: 360px">
+            <label>Select Job to View Applicants</label>
+            <select id="emp-job-select" onchange="loadApplicants()">
+              <option value="">— Choose a job —</option>
+            </select>
+          </div>
+          <div
+            id="applicants-loading"
+            style="display: none"
+            class="spinner"
+          ></div>
+          <div id="applicants-content" style="display: none"></div>
+          <div id="applicants-empty" class="empty" style="display: none">
+            <div class="empty-icon">👤</div>
+            <h3>No applicants yet</h3>
+            <p>Share your job posting to attract candidates.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+     VIEW: ADMIN DASHBOARD
+═══════════════════════════════════════════ -->
+    <div id="view-admin" class="view">
+      <div class="page">
+        <div class="dash-header">
+          <h2>Admin <span>Panel</span></h2>
+          <button class="btn btn-ghost btn-sm" onclick="loadAdminUsers()">
+            ⟳ Refresh
+          </button>
+        </div>
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('admin', 'users')">
+            All Users
+          </button>
+        </div>
+        <div id="admin-tab-users" class="tab-content active">
+          <div id="admin-loading" class="spinner"></div>
+          <div id="admin-users-content" style="display: none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════ -->
+
+    <!-- Create Job Modal -->
+    <div
+      id="create-job-modal"
+      class="modal-overlay"
+      style="display: none"
+      onclick="overlayClose(event, 'create-job-modal')"
+    >
+      <div class="modal" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal('create-job-modal')">
+          ✕
+        </button>
+        <h3>Post a New Job</h3>
+        <div class="form-group">
+          <label>Job Title</label>
+          <input
+            type="text"
+            id="job-title"
+            placeholder="e.g. Senior React Developer"
+          />
+        </div>
+        <div class="form-group">
+          <label>Company Name</label>
+          <input type="text" id="job-company" placeholder="e.g. Acme Corp" />
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <input
+            type="text"
+            id="job-location"
+            placeholder="e.g. Remote / Chennai / Bangalore"
+          />
+        </div>
+        <div class="form-group">
+          <label>Salary (₹ per annum)</label>
+          <input type="number" id="job-salary" placeholder="e.g. 1200000" />
+        </div>
+        <div class="form-group">
+          <label>Job Description</label>
+          <textarea
+            id="job-desc"
+            placeholder="Describe the role, responsibilities, requirements..."
+          ></textarea>
+        </div>
+        <button
+          class="btn btn-primary"
+          style="width: 100%"
+          id="create-job-btn"
+          onclick="doCreateJob()"
+        >
+          Post Job
+        </button>
+      </div>
+    </div>
+
+    <!-- Job Apply Modal (User) -->
+    <div
+      id="apply-modal"
+      class="modal-overlay"
+      style="display: none"
+      onclick="overlayClose(event, 'apply-modal')"
+    >
+      <div class="modal" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal('apply-modal')">
+          ✕
+        </button>
+        <div id="apply-modal-body"></div>
+      </div>
+    </div>
+
+    <!-- Job Applicants Modal (Employer) - full page style already in tabs -->
+
+    <script>
+      // ═══════════════════════════════════════════
+      //  CONFIG
+      // ═══════════════════════════════════════════
+      const BASE = "http://localhost:3000/api/v1";
+
+      // ═══════════════════════════════════════════
+      //  STATE
+      // ═══════════════════════════════════════════
+      let token = localStorage.getItem("hf_token") || null;
+      let userInfo = null;
+      let currentJobsPage = 1;
+      let totalJobsPages = 1;
+      let userJobsPage = 1;
+      let totalUserJobsPages = 1;
+      let employerJobs = [];
+      let currentApplyJobId = null;
+
+      // ═══════════════════════════════════════════
+      //  UTILS
+      // ═══════════════════════════════════════════
+      function parseJwt(t) {
+        try {
+          return JSON.parse(atob(t.split(".")[1]));
+        } catch {
+          return null;
+        }
+      }
+
+      function api(path, options = {}) {
+        const headers = {
+          "Content-Type": "application/json",
+          ...(options.headers || {}),
+        };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        return fetch(`${BASE}${path}`, { ...options, headers }).then(
+          async (r) => {
+            const d = await r.json();
+            if (!r.ok) throw new Error(d.message || "Request failed");
+            return d;
+          },
+        );
+      }
+
+      function toast(msg, type = "info") {
+        const c = document.getElementById("toast-container");
+        const t = document.createElement("div");
+        t.className = `toast ${type}`;
+        const icons = { success: "✅", error: "❌", info: "ℹ️" };
+        t.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 3500);
+      }
+
+      function fmt(n) {
+        return new Intl.NumberFormat("en-IN", {
+          style: "currency",
+          currency: "INR",
+          maximumFractionDigits: 0,
+        }).format(n);
+      }
+
+      function timeAgo(dateStr) {
+        const diff = Date.now() - new Date(dateStr);
+        const d = Math.floor(diff / 86400000);
+        if (d === 0) return "Today";
+        if (d === 1) return "1 day ago";
+        if (d < 30) return `${d} days ago`;
+        return new Date(dateStr).toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+      }
+
+      // ═══════════════════════════════════════════
+      //  VIEWS
+      // ═══════════════════════════════════════════
+      function showView(name) {
+        document
+          .querySelectorAll(".view")
+          .forEach((v) => v.classList.remove("active"));
+        const el = document.getElementById(`view-${name}`);
+        if (el) el.classList.add("active");
+
+        // Side effects
+        if (name === "jobs") loadPublicJobs(currentJobsPage);
+        if (name === "user") {
+          loadUserJobs(userJobsPage);
+        }
+        if (name === "employer") {
+          loadEmployerJobs();
+        }
+        if (name === "admin") {
+          loadAdminUsers();
+        }
+      }
+
+      function goHome() {
+        showView(
+          token
+            ? userInfo?.role === "user"
+              ? "user"
+              : userInfo?.role === "employer"
+                ? "employer"
+                : "admin"
+            : "jobs",
+        );
+      }
+      function goDashboard() {
+        showView(userInfo?.role || "jobs");
+      }
+
+      // ═══════════════════════════════════════════
+      //  NAV STATE
+      // ═══════════════════════════════════════════
+      function updateNav() {
+        const loggedIn = !!token;
+        document.getElementById("nav-btn-login").style.display = loggedIn
+          ? "none"
+          : "";
+        document.getElementById("nav-btn-register").style.display = loggedIn
+          ? "none"
+          : "";
+        document.getElementById("nav-btn-dashboard").style.display = loggedIn
+          ? ""
+          : "none";
+        document.getElementById("nav-btn-logout").style.display = loggedIn
+          ? ""
+          : "none";
+
+        const badge = document.getElementById("nav-role-badge");
+        if (loggedIn && userInfo) {
+          badge.style.display = "";
+          badge.textContent = userInfo.role;
+          badge.className = `nav-badge ${userInfo.role}`;
+        } else {
+          badge.style.display = "none";
+        }
+      }
+
+      // ═══════════════════════════════════════════
+      //  AUTH
+      // ═══════════════════════════════════════════
+      async function doRegister() {
+        const username = document.getElementById("reg-username").value.trim();
+        const email = document.getElementById("reg-email").value.trim();
+        const password = document.getElementById("reg-password").value;
+        if (!username || !email || !password)
+          return toast("All fields are required", "error");
+        const btn = document.getElementById("reg-btn");
+        btn.disabled = true;
+        btn.textContent = "Creating...";
+        try {
+          await api("/auth/register", {
+            method: "POST",
+            body: JSON.stringify({ username, email, password }),
+          });
+          toast("Account created! Please sign in.", "success");
+          document.getElementById("reg-username").value = "";
+          document.getElementById("reg-email").value = "";
+          document.getElementById("reg-password").value = "";
+          showView("login");
+        } catch (e) {
+          toast(e.message, "error");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Create Account";
+        }
+      }
+
+      async function doLogin() {
+        const email = document.getElementById("login-email").value.trim();
+        const password = document.getElementById("login-password").value;
+        if (!email || !password)
+          return toast("All fields are required", "error");
+        const btn = document.getElementById("login-btn");
+        btn.disabled = true;
+        btn.textContent = "Signing in...";
+        try {
+          const data = await api("/auth/login", {
+            method: "POST",
+            body: JSON.stringify({ email, password }),
+          });
+          token = data.accessToken;
+          localStorage.setItem("hf_token", token);
+          userInfo = parseJwt(token);
+          updateNav();
+          toast(`Welcome back, ${userInfo.username}!`, "success");
+          document.getElementById("login-email").value = "";
+          document.getElementById("login-password").value = "";
+          if (userInfo.role === "user") {
+            document.getElementById("user-name").textContent =
+              userInfo.username;
+            showView("user");
+          } else if (userInfo.role === "employer") {
+            showView("employer");
+          } else if (userInfo.role === "admin") {
+            showView("admin");
+          }
+        } catch (e) {
+          toast(e.message, "error");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Sign In";
+        }
+      }
+
+      function logout() {
+        token = null;
+        userInfo = null;
+        localStorage.removeItem("hf_token");
+        updateNav();
+        showView("jobs");
+        toast("Logged out successfully", "info");
+      }
+
+      // ═══════════════════════════════════════════
+      //  PUBLIC JOBS
+      // ═══════════════════════════════════════════
+      async function loadPublicJobs(page = 1) {
+        currentJobsPage = page;
+        document.getElementById("jobs-loading").style.display = "block";
+        document.getElementById("jobs-list").style.display = "none";
+        document.getElementById("jobs-empty").style.display = "none";
+        document.getElementById("jobs-pagination").style.display = "none";
+
+        try {
+          const data = await api(`/jobs?page=${page}&limit=6`);
+          totalJobsPages = data.totalPages;
+          document.getElementById("jobs-loading").style.display = "none";
+
+          if (!data.jobs || data.jobs.length === 0) {
+            document.getElementById("jobs-empty").style.display = "block";
+            return;
+          }
+
+          const list = document.getElementById("jobs-list");
+          list.innerHTML = data.jobs.map((j) => jobCard(j, false)).join("");
+          list.style.display = "grid";
+          renderPagination(
+            "jobs-pagination",
+            page,
+            data.totalPages,
+            loadPublicJobs,
+          );
+        } catch (e) {
+          document.getElementById("jobs-loading").style.display = "none";
+          toast("Failed to load jobs. Is the server running?", "error");
+        }
+      }
+
+      function jobCard(j, showApply = true) {
+        const role = userInfo?.role;
+        const applyBtn =
+          showApply && role === "user"
+            ? `<button class="btn btn-primary btn-sm" onclick="openApplyModal('${j._id}','${j.title}','${j.company}')">Apply Now</button>`
+            : !token
+              ? `<button class="btn btn-ghost btn-sm" onclick="showView('login')">Login to Apply</button>`
+              : "";
+
+        return `
+    <div class="job-card">
+      <div class="job-title">${j.title}</div>
+      <div class="job-company">${j.company}</div>
+      <p style="color:var(--muted);font-size:13px;line-height:1.55">${j.description ? j.description.substring(0, 100) + "..." : ""}</p>
+      <div class="job-meta">
+        <span class="tag">📍 ${j.location}</span>
+        <span class="tag salary">💰 ${fmt(j.salary)}</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px">
+        <span style="font-size:12px;color:var(--muted)">${j.createdAt ? timeAgo(j.createdAt) : ""}</span>
+        ${applyBtn}
+      </div>
+    </div>`;
+      }
+
+      // ═══════════════════════════════════════════
+      //  USER JOBS
+      // ═══════════════════════════════════════════
+      async function loadUserJobs(page = 1) {
+        userJobsPage = page;
+        document.getElementById("user-jobs-loading").style.display = "block";
+        document.getElementById("user-jobs-list").style.display = "none";
+        document.getElementById("user-jobs-empty").style.display = "none";
+        document.getElementById("user-jobs-pagination").style.display = "none";
+
+        try {
+          const data = await api(`/jobs?page=${page}&limit=6`);
+          totalUserJobsPages = data.totalPages;
+          document.getElementById("user-jobs-loading").style.display = "none";
+
+          if (!data.jobs || data.jobs.length === 0) {
+            document.getElementById("user-jobs-empty").style.display = "block";
+            return;
+          }
+
+          const list = document.getElementById("user-jobs-list");
+          list.innerHTML = data.jobs.map((j) => jobCard(j, true)).join("");
+          list.style.display = "grid";
+          renderPagination(
+            "user-jobs-pagination",
+            page,
+            data.totalPages,
+            loadUserJobs,
+          );
+        } catch (e) {
+          document.getElementById("user-jobs-loading").style.display = "none";
+          toast("Failed to load jobs", "error");
+        }
+      }
+
+      // ═══════════════════════════════════════════
+      //  APPLY
+      // ═══════════════════════════════════════════
+      function openApplyModal(jobId, title, company) {
+        currentApplyJobId = jobId;
+        document.getElementById("apply-modal-body").innerHTML = `
+    <h3>Apply to this Job</h3>
+    <div class="card" style="margin-bottom:20px">
+      <div class="job-title">${title}</div>
+      <div class="job-company">${company}</div>
+    </div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:20px">
+      Your profile will be submitted to the employer. They will review and get back to you.
+    </p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" style="flex:1" id="confirm-apply-btn" onclick="doApply()">Confirm Application</button>
+      <button class="btn btn-ghost" onclick="closeModal('apply-modal')">Cancel</button>
+    </div>
+  `;
+        openModal("apply-modal");
+      }
+
+      async function doApply() {
+        const btn = document.getElementById("confirm-apply-btn");
+        btn.disabled = true;
+        btn.textContent = "Applying...";
+        try {
+          await api(`/application/${currentApplyJobId}`, { method: "POST" });
+          toast("Application submitted successfully! 🎉", "success");
+          closeModal("apply-modal");
+        } catch (e) {
+          toast(e.message, "error");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Confirm Application";
+        }
+      }
+
+      // ═══════════════════════════════════════════
+      //  MY APPLICATIONS
+      // ═══════════════════════════════════════════
+      async function loadMyApplications() {
+        document.getElementById("my-apps-loading").style.display = "block";
+        document.getElementById("my-apps-content").style.display = "none";
+        document.getElementById("my-apps-empty").style.display = "none";
+
+        try {
+          const data = await api("/application/my");
+          document.getElementById("my-apps-loading").style.display = "none";
+
+          const apps = data.applications || data.application || [];
+          if (apps.length === 0) {
+            document.getElementById("my-apps-empty").style.display = "block";
+            return;
+          }
+
+          const content = document.getElementById("my-apps-content");
+          content.innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Job Title</th><th>Company</th><th>Location</th><th>Status</th><th>Applied</th>
+          </tr></thead>
+          <tbody>
+            ${apps
+              .map(
+                (a) => `
+              <tr>
+                <td><strong>${a.job?.title || "—"}</strong></td>
+                <td style="color:var(--accent)">${a.job?.company || "—"}</td>
+                <td style="color:var(--muted)">${a.job?.location || "—"}</td>
+                <td><span class="status ${a.status}">${a.status}</span></td>
+                <td style="color:var(--muted)">${timeAgo(a.createdAt)}</td>
+              </tr>`,
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>`;
+          content.style.display = "block";
+        } catch (e) {
+          document.getElementById("my-apps-loading").style.display = "none";
+          toast("Failed to load applications", "error");
+        }
+      }
+
+      // ═══════════════════════════════════════════
+      //  EMPLOYER JOBS
+      // ═══════════════════════════════════════════
+      async function loadEmployerJobs() {
+        document.getElementById("emp-jobs-loading").style.display = "block";
+        document.getElementById("emp-jobs-list").style.display = "none";
+        document.getElementById("emp-jobs-empty").style.display = "none";
+
+        try {
+          // Fetch all jobs and filter by createdBy (employer owns)
+          const data = await api(`/jobs?page=1&limit=100`);
+          document.getElementById("emp-jobs-loading").style.display = "none";
+
+          const myJobs = (data.jobs || []).filter((j) => {
+            if (j.createdBy && typeof j.createdBy === "object")
+              return j.createdBy._id === userInfo?.userId;
+            return j.createdBy === userInfo?.userId;
+          });
+
+          employerJobs = myJobs;
+
+          // Populate job select for applicants tab
+          const sel = document.getElementById("emp-job-select");
+          sel.innerHTML = '<option value="">— Choose a job —</option>';
+          myJobs.forEach((j) => {
+            sel.innerHTML += `<option value="${j._id}">${j.title} @ ${j.company}</option>`;
+          });
+
+          if (myJobs.length === 0) {
+            document.getElementById("emp-jobs-empty").style.display = "block";
+            return;
+          }
+
+          const list = document.getElementById("emp-jobs-list");
+          list.innerHTML = myJobs
+            .map(
+              (j) => `
+      <div class="job-card">
+        <div class="job-title">${j.title}</div>
+        <div class="job-company">${j.company}</div>
+        <p style="color:var(--muted);font-size:13px;line-height:1.55">${j.description ? j.description.substring(0, 100) + "..." : ""}</p>
+        <div class="job-meta">
+          <span class="tag">📍 ${j.location}</span>
+          <span class="tag salary">💰 ${fmt(j.salary)}</span>
+        </div>
+        <div style="margin-top:14px">
+          <button class="btn btn-ghost btn-sm" onclick="viewApplicantsForJob('${j._id}')">View Applicants</button>
+        </div>
+      </div>`,
+            )
+            .join("");
+          list.style.display = "grid";
+        } catch (e) {
+          document.getElementById("emp-jobs-loading").style.display = "none";
+          toast("Failed to load jobs", "error");
+        }
+      }
+
+      function viewApplicantsForJob(jobId) {
+        document.getElementById("emp-job-select").value = jobId;
+        switchTab("employer", "applicants");
+        loadApplicants();
+      }
+
+      async function loadApplicants() {
+        const jobId = document.getElementById("emp-job-select").value;
+        document.getElementById("applicants-content").style.display = "none";
+        document.getElementById("applicants-empty").style.display = "none";
+        document.getElementById("applicants-loading").style.display = "none";
+        if (!jobId) return;
+
+        document.getElementById("applicants-loading").style.display = "block";
+        try {
+          const data = await api(`/application/job/${jobId}`);
+          document.getElementById("applicants-loading").style.display = "none";
+          const apps = data.application || [];
+
+          if (apps.length === 0) {
+            document.getElementById("applicants-empty").style.display = "block";
+            return;
+          }
+
+          const content = document.getElementById("applicants-content");
+          content.innerHTML = `
+      <div class="section-title">${apps.length} Applicant${apps.length !== 1 ? "s" : ""}</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Name</th><th>Email</th><th>Status</th><th>Applied</th><th>Action</th>
+          </tr></thead>
+          <tbody>
+            ${apps
+              .map(
+                (a) => `
+              <tr id="app-row-${a._id}">
+                <td><strong>${a.applicant?.username || "—"}</strong></td>
+                <td style="color:var(--muted)">${a.applicant?.email || "—"}</td>
+                <td><span class="status ${a.status}" id="status-${a._id}">${a.status}</span></td>
+                <td style="color:var(--muted)">${timeAgo(a.createdAt)}</td>
+                <td>
+                  ${
+                    a.status === "pending"
+                      ? `
+                    <div style="display:flex;gap:6px">
+                      <button class="btn btn-success btn-sm" onclick="updateStatus('${a._id}','accepted')">Accept</button>
+                      <button class="btn btn-danger btn-sm" onclick="updateStatus('${a._id}','rejected')">Reject</button>
+                    </div>`
+                      : `<span style="color:var(--muted);font-size:13px">—</span>`
+                  }
+                </td>
+              </tr>`,
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>`;
+          content.style.display = "block";
+        } catch (e) {
+          document.getElementById("applicants-loading").style.display = "none";
+          toast(e.message, "error");
+        }
+      }
+
+      async function updateStatus(appId, status) {
+        try {
+          await api(`/application/${appId}/status`, {
+            method: "PATCH",
+            body: JSON.stringify({ status }),
+          });
+          toast(`Application ${status}!`, "success");
+          // Update UI inline
+          const el = document.getElementById(`status-${appId}`);
+          if (el) {
+            el.textContent = status;
+            el.className = `status ${status}`;
+          }
+          const row = document.getElementById(`app-row-${appId}`);
+          if (row) {
+            const td = row.querySelector("td:last-child");
+            if (td)
+              td.innerHTML = `<span style="color:var(--muted);font-size:13px">—</span>`;
+          }
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      // ═══════════════════════════════════════════
+      //  CREATE JOB
+      // ═══════════════════════════════════════════
+      async function doCreateJob() {
+        const title = document.getElementById("job-title").value.trim();
+        const company = document.getElementById("job-company").value.trim();
+        const location = document.getElementById("job-location").value.trim();
+        const salary = document.getElementById("job-salary").value;
+        const description = document.getElementById("job-desc").value.trim();
+
+        if (!title || !company || !location || !salary || !description)
+          return toast("All fields are required", "error");
+
+        const btn = document.getElementById("create-job-btn");
+        btn.disabled = true;
+        btn.textContent = "Posting...";
+        try {
+          await api("/employer/jobs", {
+            method: "POST",
+            body: JSON.stringify({
+              title,
+              company,
+              location,
+              salary: Number(salary),
+              description,
+            }),
+          });
+          toast("Job posted successfully! 🎉", "success");
+          closeModal("create-job-modal");
+          [
+            "job-title",
+            "job-company",
+            "job-location",
+            "job-salary",
+            "job-desc",
+          ].forEach((id) => (document.getElementById(id).value = ""));
+          loadEmployerJobs();
+        } catch (e) {
+          toast(e.message, "error");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Post Job";
+        }
+      }
+
+      // ═══════════════════════════════════════════
+      //  ADMIN
+      // ═══════════════════════════════════════════
+      async function loadAdminUsers() {
+        document.getElementById("admin-loading").style.display = "block";
+        document.getElementById("admin-users-content").style.display = "none";
+
+        try {
+          const data = await api("/admin/users");
+          document.getElementById("admin-loading").style.display = "none";
+          const users = data.users || [];
+
+          const roleCount = { user: 0, employer: 0, admin: 0 };
+          users.forEach((u) => {
+            if (roleCount[u.role] !== undefined) roleCount[u.role]++;
+          });
+
+          const content = document.getElementById("admin-users-content");
+          content.innerHTML = `
+      <div class="stats">
+        <div class="stat"><div class="stat-val">${users.length}</div><div class="stat-label">Total Users</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--success)">${roleCount.user}</div><div class="stat-label">Job Seekers</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--accent)">${roleCount.employer}</div><div class="stat-label">Employers</div></div>
+        <div class="stat"><div class="stat-val" style="color:#a78bfa">${roleCount.admin}</div><div class="stat-label">Admins</div></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Username</th><th>Email</th><th>Current Role</th><th>Change Role</th>
+          </tr></thead>
+          <tbody>
+            ${users
+              .map(
+                (u) => `
+              <tr>
+                <td><strong>${u.username}</strong></td>
+                <td style="color:var(--muted)">${u.email}</td>
+                <td>
+                  <span class="role-${u.role}" style="font-weight:600;font-size:13px;text-transform:capitalize">${u.role}</span>
+                </td>
+                <td>
+                  ${
+                    u._id === userInfo?.userId
+                      ? `<span style="color:var(--muted);font-size:13px">You</span>`
+                      : `<div style="display:flex;gap:6px;align-items:center">
+                        <select id="role-sel-${u._id}" style="width:130px;padding:6px 10px;font-size:13px">
+                          <option value="user" ${u.role === "user" ? "selected" : ""}>User</option>
+                          <option value="employer" ${u.role === "employer" ? "selected" : ""}>Employer</option>
+                          <option value="admin" ${u.role === "admin" ? "selected" : ""}>Admin</option>
+                        </select>
+                        <button class="btn btn-ghost btn-sm" onclick="changeUserRole('${u._id}')">Update</button>
+                      </div>`
+                  }
+                </td>
+              </tr>`,
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>`;
+          content.style.display = "block";
+        } catch (e) {
+          document.getElementById("admin-loading").style.display = "none";
+          toast("Failed to load users", "error");
+        }
+      }
+
+      async function changeUserRole(userId) {
+        const role = document.getElementById(`role-sel-${userId}`).value;
+        try {
+          await api(`/admin/users/${userId}/role`, {
+            method: "PATCH",
+            body: JSON.stringify({ role }),
+          });
+          toast(`Role updated to ${role}`, "success");
+          loadAdminUsers();
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      // ═══════════════════════════════════════════
+      //  TABS
+      // ═══════════════════════════════════════════
+      function switchTab(section, tabName) {
+        const prefix = `${section}-tab-`;
+        document
+          .querySelectorAll(`[id^="${prefix}"]`)
+          .forEach((el) => el.classList.remove("active"));
+        document.getElementById(`${prefix}${tabName}`).classList.add("active");
+
+        // Update tab button states
+        const viewEl = document.getElementById(`view-${section}`);
+        viewEl
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+        const allTabs = viewEl.querySelectorAll(".tab");
+        const tabNames = {
+          browse: 0,
+          "my-apps": 1,
+          "my-jobs": 0,
+          applicants: 1,
+          users: 0,
+        };
+        const idx = tabNames[tabName] ?? 0;
+        if (allTabs[idx]) allTabs[idx].classList.add("active");
+
+        // Load data on tab switch
+        if (section === "user" && tabName === "my-apps") loadMyApplications();
+        if (section === "user" && tabName === "browse")
+          loadUserJobs(userJobsPage);
+        if (section === "employer" && tabName === "my-jobs") loadEmployerJobs();
+      }
+
+      // ═══════════════════════════════════════════
+      //  PAGINATION
+      // ═══════════════════════════════════════════
+      function renderPagination(containerId, current, total, callback) {
+        if (total <= 1) return;
+        const el = document.getElementById(containerId);
+        el.style.display = "flex";
+        let html = `<button class="page-btn" ${current <= 1 ? "disabled" : ""} onclick="${callback.name}(${current - 1})">←</button>`;
+        for (let i = 1; i <= total; i++) {
+          html += `<button class="page-btn ${i === current ? "active" : ""}" onclick="${callback.name}(${i})">${i}</button>`;
+        }
+        html += `<button class="page-btn" ${current >= total ? "disabled" : ""} onclick="${callback.name}(${current + 1})">→</button>`;
+        el.innerHTML = html;
+      }
+
+      // ═══════════════════════════════════════════
+      //  MODAL
+      // ═══════════════════════════════════════════
+      function openModal(id) {
+        document.getElementById(id).style.display = "flex";
+      }
+      function closeModal(id) {
+        document.getElementById(id).style.display = "none";
+      }
+      function overlayClose(event, id) {
+        if (event.target === document.getElementById(id)) closeModal(id);
+      }
+
+      // ═══════════════════════════════════════════
+      //  INIT
+      // ═══════════════════════════════════════════
+      function init() {
+        if (token) {
+          userInfo = parseJwt(token);
+          // Check token expiry
+          if (userInfo && userInfo.exp * 1000 < Date.now()) {
+            token = null;
+            userInfo = null;
+            localStorage.removeItem("hf_token");
+            toast("Session expired. Please login again.", "info");
+          }
+        }
+        updateNav();
+        if (token && userInfo) {
+          if (userInfo.role === "user") {
+            document.getElementById("user-name").textContent =
+              userInfo.username;
+            showView("user");
+          } else if (userInfo.role === "employer") {
+            showView("employer");
+          } else if (userInfo.role === "admin") {
+            showView("admin");
+          }
+        } else {
+          showView("jobs");
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>

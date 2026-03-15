@@ -12,7 +12,11 @@ const adminRoutes = require("./routes/admin.routes");
 const jobRoutes = require("./routes/job.routes");
 const applicationRoutes = require("./routes/application.routes");
 
+const cors = require("cors");
+app.use(cors());
+
 app.use(express.json());
+app.use(cors({ origin: "http://127.0.0.1:5500" }));
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/home", homeRoutes);

@@ -153,10 +153,8 @@ const getMyApplications = async (req, res) => {
     }
 
     const applications = await Application.find({
-      applicant: userId,
-    })
-      .populate("job", "title company location salary")
-      .select("_id job status createdAt");
+      applicant: req.userInfo.userId,
+    }).populate("job", "title company location salary");
 
     return res.status(200).json({
       success: true,

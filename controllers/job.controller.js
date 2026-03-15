@@ -11,7 +11,7 @@ const getAllJobs = async (req, res) => {
     const totalJobs = await Job.countDocuments();
 
     const jobs = await Job.find()
-      .select("_id title description company location salary")
+      .select("_id title description company location salary createdBy")
       .sort(sort)
       .skip(skip)
       .limit(limit);
@@ -37,7 +37,7 @@ const getSingleJob = async (req, res) => {
     const { id } = req.params;
 
     const job = await Job.findById(id)
-      .select("_id title description company location salary")
+      .select("_id title description company location salary createdBy")
       .populate("createdBy", "username email");
 
     if (!job) {
